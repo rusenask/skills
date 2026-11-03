@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# selftest — drive snapshot.mjs end to end against throwaway git repos.
+# Needs node 18+ and git. Exit 0 means every case passed.
+set -euo pipefail
+
+snapshot="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/snapshot.mjs"
+work="$(mktemp -d)"
+trap 'rm -rf "$work"' EXIT
+
+pass=0 fail=0
+expect() { # expect <want-exit> <label> <cmd...>
+  local want="$1" label="$2"; shift 2
+  local got=0; "$@" >"$work/log" 2>&1 || got=$?
+  if [ "$got" = "$want" ]; then pass=$((pass + 1)); echo "ok    $label";
+  else fail=$((fail + 1)); echo "FAIL  $label (exit $got, want $want)"; sed 's/^/      /' "$work/log" | head -8; fi
+}
+check() { # check <label> <cmd...> — a plain assertion on the last snapshot's output
+  local label="$1"; shift
+  if "$@" >/dev/null 2>&1; then pass=$((pass + 1)); echo "ok    $label";
+  else fail=$((fail + 1)); echo "FAIL  $label"; fi
+}
+config() { # config <name> <json> — configs live outside the repo, so they never dirty it
+  printf '%s\n' "$2" > "$work/$1.json"
+}
+snap() { # snap <config-name> [cwd]
+  (cd "${2:-$R}" && node "$snapshot" --config "$work/$1.json" --out "$work/out")
+}
+
+R="$work/repo"; mkdir -p "$R"; cd "$R"
+git init -q -b main
+git config user.email t@example.invalid
+git config user.name selftest
+
+config base '{"scope":"svc","paths":["svc"]}'
+expect 2 "repository without a commit is refused" snap base
+
+mkdir -p svc/api other
+printf 'package svc\n\nfunc A() {}\n' > svc/a.go
+printf 'package api\n' > svc/api/h.go
+printf 'package api // generated\n' > svc/api/h.pb.go
+printf 'Run it:\n\n```sh\nmake\n```\n' > svc/README.md
+printf 'x\0y' > svc/blob.bin
+printf 'package other\n' > other/o.go
+git add -A && git commit -qm "initial"
+
+config gated '{"scope":"svc","paths":["svc",":(exclude)*.pb.go"],
+  "gates":[{"name":"build","cmd":"true"},{"name":"test","cmd":"echo checked"}]}'
+expect 0 "clean scope with passing gates is green" snap gated
+check "bundle holds in-scope files" grep -q '^## `svc/a.go` (3 lines)$' "$work/out/bundle.md"
+check "bundle leaves out files outside the paths" sh -c "! grep -q 'other/o.go' '$work/out/bundle.md'"
+check "exclude pathspec drops nested generated files" sh -c "! grep -q 'h.pb.go' '$work/out/bundle.md'"
+check "a file holding a fence gets a longer fence" grep -q '^````md$' "$work/out/bundle.md"
+check "binary files are listed, not bundled" grep -q '`svc/blob.bin` — binary' "$work/out/manifest.md"
+check "manifest pins the commit" grep -q "$(git rev-parse HEAD)" "$work/out/manifest.md"
+check "manifest records green gates" grep -q '^- \*\*Gates:\*\* green$' "$work/out/manifest.md"
+expect 0 "runs from a subdirectory with root-relative paths" snap gated "$R/svc/api"
+
+config red '{"scope":"svc","paths":["svc"],"gates":[{"name":"test","cmd":"echo boom-detail; exit 3"}]}'
+expect 1 "failing gate exits 1" snap red
+check "manifest names the red gate" grep -q 'RED — test failed' "$work/out/manifest.md"
+check "manifest keeps the failing output" grep -q 'boom-detail' "$work/out/manifest.md"
+
+config rewrite '{"scope":"svc","paths":["svc"],"gates":[{"name":"fmt","cmd":"echo // >> svc/a.go"}]}'
+expect 2 "gate that rewrites scope is refused" snap rewrite
+git checkout -q -- svc/a.go
+
+echo "// edit" >> other/o.go
+expect 0 "uncommitted change outside scope is ignored" snap base
+git checkout -q -- other/o.go
+echo "// edit" >> svc/a.go
+expect 2 "uncommitted change in scope is refused" snap base
+git checkout -q -- svc/a.go
+echo "package svc" > svc/new.go
+expect 2 "untracked file in scope is refused" snap base
+rm svc/new.go
+
+config none '{"scope":"svc","paths":["nowhere"]}'
+expect 2 "paths matching nothing are refused" snap none
+config tiny '{"scope":"svc","paths":["svc"],"maxTokens":5}'
+expect 2 "scope over the token budget is refused" snap tiny
+config nopaths '{"scope":"svc"}'
+expect 2 "config without paths is refused" snap nopaths
+config badgate '{"scope":"svc","paths":["svc"],"gates":[{"name":"test"}]}'
+expect 2 "gate without a command is refused" snap badgate
+config badbudget '{"scope":"svc","paths":["svc"],"maxTokens":"120k"}'
+expect 2 "non-numeric token budget is refused, not ignored" snap badbudget
+expect 2 "--out inside the scope is refused" node "$snapshot" --config "$work/base.json" --out "$R/svc/out"
+check "and the refusal names --out" grep -q -- '--out must sit outside the scope' "$work/log"
+rm -rf "$R/svc/out"
+
+echo; echo "$pass passed, $fail failed"
+[ "$fail" = 0 ]

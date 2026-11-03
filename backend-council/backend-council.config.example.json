@@ -1,0 +1,15 @@
+{
+  "scope": "billing",
+  "paths": [
+    "cmd/billing",
+    "internal/billing",
+    ":(exclude)*.pb.go",
+    ":(exclude)*/testdata/*"
+  ],
+  "maxTokens": 120000,
+  "gates": [
+    { "name": "build", "cmd": "go build ./cmd/billing/... ./internal/billing/..." },
+    { "name": "vet", "cmd": "go vet ./cmd/billing/... ./internal/billing/..." },
+    { "name": "test", "cmd": "go test -race ./cmd/billing/... ./internal/billing/..." }
+  ]
+}
