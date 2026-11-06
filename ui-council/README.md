@@ -23,16 +23,22 @@ method, guardrails, and stop conditions are in [`SKILL.md`](./SKILL.md).
    UI_EMAIL=... UI_PASSWORD=... node scripts/capture.mjs --config ui-council.config.json --out /tmp/ui-r0
    UI_EMAIL=... UI_PASSWORD=... node scripts/overflow.mjs --config ui-council.config.json
    ```
-4. Fill in `templates/brief.md` once for your product.
-5. Run the loop in `SKILL.md`: brief → three-reviewer council → verify every
-   claim → implement the survivors → re-capture → log the score → repeat.
+4. Screenshot the equivalent screens of two or three products you compete
+   with into `references/<product>/`, at the same viewports. They stay frozen
+   for the whole series.
+5. Fill in `templates/brief.md` once for your product, and write down the bar
+   (e.g. "at or above every reference in every category") in the score log.
+6. Run the loop in `SKILL.md`: brief → three-reviewer council scoring the
+   target and the references → verify every claim → implement the survivors
+   → re-capture → log the gap → repeat until a full-council round clears the
+   bar.
 
 ## What's here
 
 | Path | Purpose |
 |------|---------|
 | `SKILL.md` | The method: the loop, triage rules, guardrails, stop conditions. |
-| `templates/brief.md` | Fixed base brief (the scoring anchor lives here). |
+| `templates/brief.md` | Fixed base brief (the scoring anchor and the reference set live here). |
 | `templates/round-delta.md` | Per-round delta brief. |
 | `templates/rounds.md` | Score-log format. |
 | `scripts/capture.mjs` | Login + full-page screenshots, config-driven. |

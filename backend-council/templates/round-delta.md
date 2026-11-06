@@ -1,12 +1,16 @@
 # Round <N> — delta brief
 
-Read this together with the base brief (`brief.md`). The anchor, rubric and
-scope are unchanged; only the following is new this round.
+Read this together with the base brief (`brief.md`). The anchor, rubric,
+scope and reference are unchanged; only the following is new this round.
+
+<!-- Never put the target score, earlier scores, or other reviewers' replies
+     in this brief. Reviewers who know the bar drift toward it. -->
 
 ## Snapshot
 - Commit: `<sha>` (from `manifest.md`)
 - Bundle: `<out>/bundle.md`, <files> files, ≈<tokens> tokens
 - Gates: green (<the gates that ran>)
+- Reference: `<ref-out>/bundle.md`, commit `<ref-sha>` (unchanged)
 
 ## What changed since round <N-1>
 <A bullet list of what shipped since the last snapshot: the fixes you made.

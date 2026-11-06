@@ -27,11 +27,16 @@ is in [`templates/brief.md`](./templates/brief.md).
    ```
    node <skills>/backend-council/scripts/snapshot.mjs --config backend-council.config.json --out /tmp/bc-r0
    ```
-3. Fill in `templates/brief.md` once for the codebase, and keep it beside the
-   score log (`templates/rounds.md`) in the target repository.
-4. Run the loop in `SKILL.md`: snapshot → three-reviewer council → verify
-   every claim → implement the survivors → gates and diff-review → log the
-   score → repeat.
+3. Snapshot a reference once: a package the owner calls reference quality,
+   bundled the same way with its own config. It stays frozen for the series
+   and cancels reviewer drift out of the score.
+4. Fill in `templates/brief.md` once for the codebase, and keep it beside the
+   score log (`templates/rounds.md`) in the target repository. Write the bar
+   in the log, never in a brief.
+5. Run the loop in `SKILL.md`: snapshot → three-reviewer council scoring the
+   scope and the reference → verify every claim → implement the survivors →
+   gates and diff-review → log the gap → repeat until a full-council round
+   clears the bar.
 
 `scripts/selftest` checks `snapshot.mjs` end to end against throwaway repos;
 run it after changing the script.

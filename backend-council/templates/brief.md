@@ -6,6 +6,11 @@ build, lint and test gates. Review only that code. If you can read the
 repository, you may open other files at the same commit to see how this code is
 called, but score only the bundle. You cannot edit or run anything.
 
+You are also given a **reference bundle**: code the owner considers reference
+quality. Score it on the same rubric, and recommend no changes to it. Score
+each bundle on its own merits; do not raise or lower one to keep a gap with
+the other.
+
 Judge whether this code will hold up through years of change by people who did
 not write it. Whether it works today is not in question: the gates say it does.
 
@@ -13,6 +18,10 @@ not write it. Whether it works today is not in question: the gates say it does.
 <One paragraph: what it does, who calls it, scale and traffic shape, what
 failure costs (e.g. "a duplicate charge reaches a customer's card statement"),
 and who maintains it.>
+
+## The reference
+<One line: what the reference bundle is and why it was chosen, e.g. "`internal/ledger`
+at `<sha>`, the team's most-praised package: same stack, similar size".>
 
 ## Stack and house conventions
 <Language and version, frameworks, datastore, queue, deploy target. Then the
@@ -138,7 +147,8 @@ Each category says what good looks like, then lists the smells to flag.
    next two years?
 
 ## Output contract (return exactly this)
-1. **Scores**: a table of category | score | one-line reason.
+1. **Scores**: a table of category | scope | reference | one-line reason for
+   the scope's score.
 2. **What works, keep it**: up to 5 things that are already good; do not
    regress them.
 3. **Findings**: at most 12, most important first, each tagged MUST / SHOULD /
@@ -149,6 +159,7 @@ Each category says what good looks like, then lists the smells to flag.
    - the concrete change. Not "improve error handling" but "return the error
      from `store.Get` wrapped with the order id instead of logging it and
      continuing (`billing/charge.go:88`)",
+   - where the reference does it better, the reference `file:line`,
    - for edge cases: the input or sequence of events that breaks it,
    - for tests: delete, rewrite (at which surface), or add (the bug it would
      catch).
