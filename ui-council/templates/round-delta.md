@@ -1,7 +1,10 @@
 # Round <N> — delta brief
 
-Read this together with the base brief (`brief.md`). The anchor and categories
-are unchanged; only the following is new this round.
+Read this together with the base brief (`brief.md`). The anchor, categories
+and references are unchanged; only the following is new this round.
+
+<!-- Never put the target score, earlier scores, or other reviewers' replies
+     in this brief. Reviewers who know the bar drift toward it. -->
 
 ## What changed since round <N-1>
 <Bullet list of what was shipped since the last capture — the fixes you made.
@@ -14,8 +17,9 @@ viewport, or a specific flow — say so; its scores start a fresh series and are
 not comparable to the previous round's.>
 
 ## Captures provided
-- Desktop (1440px): <list or "all screens">
-- Phone (390px): <list or "all screens">
+- Target, desktop (1440px): <list or "all screens">
+- Target, phone (390px): <list or "all screens">
+- References: `references/<product>/`, `references/<product>/` (unchanged)
 
 ## Product decisions — do not re-litigate
 <Things the owner has already decided that reviewers keep flagging — e.g.
@@ -23,5 +27,6 @@ not comparable to the previous round's.>
 lives in its own tab on purpose". Reviewers should score around these, not
 against them.>
 
-## Columns to use in the score log
-category | score | one-line reason
+## Rejected last round — re-raise only with new evidence
+<One line per claim rejected last round, with the evidence — e.g. "the 'blank
+strip' on the dashboard is the 24px gap between the two summary cards".>
