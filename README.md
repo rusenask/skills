@@ -11,6 +11,8 @@ Reusable agent skills, adopted across projects.
 | [`refactor-clean`](./refactor-clean) | Refactor to the shape the code would have if designed today — one owner per concept, no compatibility sediment. |
 | [`diff-review`](./diff-review) | Audit a diff against hygiene and design rules (names, stale references, guards, comments, tests, boundaries). Not a bug hunt. |
 | [`write-docs`](./write-docs) | Write docs as a glossary of principles and pointers, not a copy of the code. |
+| [`find-state-machines`](./find-state-machines) | Find lifecycles whose state and transitions are scattered across flags, effects and callbacks, make them explicit, and give every non-terminal state a guaranteed way out. From [dzhng/skills](https://github.com/dzhng/skills) (MIT). |
+| [`audit-performance`](./audit-performance) | Audit performance as bounded work and forward progress: quantify amplification, falsify severity, rank fixes, prove them red/green. From [dzhng/skills](https://github.com/dzhng/skills) (MIT). |
 
 Each skill is a self-contained directory with a `SKILL.md` (the entry point an
 agent loads), plus any templates and scripts it needs.
